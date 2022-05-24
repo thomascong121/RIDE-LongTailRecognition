@@ -1,6 +1,7 @@
 import argparse
 import collections
 import torch
+import wandb
 import numpy as np
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
@@ -30,6 +31,15 @@ def main(config):
     # build model architecture, then print to console
     model = config.init_obj('arch', module_arch)
     logger.info(model)
+
+    project_name = 'LT_cifar10'
+    run_name = config["name"]
+    wandb_config = {'dataset': 'cifar10', 'use_loss': config['loss']['type'],
+                    'use_model': '%s+%d_experts'%(config['arch']['type'], config['arch']['args']['num_experts']),
+                    'model_arch': config['arch']['args'],'batch_size': config['data_loader']['args']['batch_size'],
+                    'num_classes': config['arch']['args']['num_classes'], 'epochs': config['trainer']['epochs'],
+                    'lr': config['optimizer']['args']['lr'], 'lr_scheduler': config['lr_scheduler']['type']}
+    wandb.init(project=project_name, name=run_name, config=wandb_config)
 
     # get function handles of loss and metrics
     loss_class = getattr(module_loss, config["loss"]["type"])
@@ -72,7 +82,7 @@ def main(config):
                       valid_data_loader=valid_data_loader,
                       lr_scheduler=lr_scheduler)
 
-    trainer.train()
+    trainer.train(wandb)
 
 
 if __name__ == '__main__':

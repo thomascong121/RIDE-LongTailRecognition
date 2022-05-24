@@ -69,9 +69,9 @@ def main(config):
         )
         test_cls_num_list = np.array(data_loader.cls_num_list)
         train_cls_num_list = np.array(train_data_loader.cls_num_list)
-        many_shot = train_cls_num_list > 100
-        medium_shot = (train_cls_num_list <= 100) & (train_cls_num_list >= 20)
-        few_shot = train_cls_num_list < 20
+        # many_shot = train_cls_num_list > 100
+        # medium_shot = (train_cls_num_list <= 100) & (train_cls_num_list >= 20)
+        # few_shot = train_cls_num_list < 20
 
     with torch.no_grad():
         for i, (data, target) in enumerate(tqdm(data_loader)):
@@ -83,13 +83,13 @@ def main(config):
                 cumulative_sample_num_experts[num - 1] += count.type(torch.float)
                 num_samples += data.size(0)
 
-                many_shot_tensor = torch.tensor(many_shot, device=device)
-                medium_shot_tensor = torch.tensor(medium_shot, device=device)
-                few_shot_tensor = torch.tensor(few_shot, device=device)
+                # many_shot_tensor = torch.tensor(many_shot, device=device)
+                # medium_shot_tensor = torch.tensor(medium_shot, device=device)
+                # few_shot_tensor = torch.tensor(few_shot, device=device)
 
-                for i, mask_shot in enumerate([many_shot_tensor, medium_shot_tensor, few_shot_tensor]):
-                    num, count = torch.unique(sample_num_experts[mask_shot[target]], return_counts=True)
-                    (cumulative_sample_num_experts_each_shot[i])[num - 1] += count.float()
+                # for i, mask_shot in enumerate([many_shot_tensor, medium_shot_tensor, few_shot_tensor]):
+                #     num, count = torch.unique(sample_num_experts[mask_shot[target]], return_counts=True)
+                #     (cumulative_sample_num_experts_each_shot[i])[num - 1] += count.float()
             else:
                 output = model(data)
 
@@ -109,9 +109,9 @@ def main(config):
                 confusion_matrix[t.long(), p.long()] += 1
     if confidence_model:
         print("Samples with num_experts:", *[('%.2f'%item) for item in (cumulative_sample_num_experts * 100 / num_samples).tolist()])
-        print({"many_hp_num": (cumulative_sample_num_experts_each_shot[0]/cumulative_sample_num_experts_each_shot[0].sum()).cpu().tolist(),
-            "medium_hp_num": (cumulative_sample_num_experts_each_shot[1]/cumulative_sample_num_experts_each_shot[1].sum()).cpu().tolist(),
-            "few_hp_num": (cumulative_sample_num_experts_each_shot[2]/cumulative_sample_num_experts_each_shot[2].sum()).cpu().tolist()})
+        # print({"many_hp_num": (cumulative_sample_num_experts_each_shot[0]/cumulative_sample_num_experts_each_shot[0].sum()).cpu().tolist(),
+        #     "medium_hp_num": (cumulative_sample_num_experts_each_shot[1]/cumulative_sample_num_experts_each_shot[1].sum()).cpu().tolist(),
+        #     "few_hp_num": (cumulative_sample_num_experts_each_shot[2]/cumulative_sample_num_experts_each_shot[2].sum()).cpu().tolist()})
 
     acc_per_class = confusion_matrix.diag()/confusion_matrix.sum(1)
     
@@ -126,10 +126,10 @@ def main(config):
         # Here we assume each class has same number of instances
         assert np.all(test_cls_num_list == test_cls_num_list[0])
 
-        many_shot_acc = acc[many_shot].mean()
-        medium_shot_acc = acc[medium_shot].mean()
-        few_shot_acc = acc[few_shot].mean()
-        print("{}, {}, {}".format(np.round(many_shot_acc * 100, decimals=2), np.round(medium_shot_acc * 100, decimals=2), np.round(few_shot_acc * 100, decimals=2)))
+        # many_shot_acc = acc[many_shot].mean()
+        # medium_shot_acc = acc[medium_shot].mean()
+        # few_shot_acc = acc[few_shot].mean()
+        # print("{}, {}, {}".format(np.round(many_shot_acc * 100, decimals=2), np.round(medium_shot_acc * 100, decimals=2), np.round(few_shot_acc * 100, decimals=2)))
 
     n_samples = len(data_loader.sampler)
     log = {'loss': total_loss / n_samples}
@@ -137,15 +137,15 @@ def main(config):
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
     })
 
-    if get_class_acc:
-        log.update({
-            "many_class_num": many_shot.sum(),
-            "medium_class_num": medium_shot.sum(),
-            "few_class_num": few_shot.sum(),
-            "many_shot_acc": many_shot_acc,
-            "medium_shot_acc": medium_shot_acc,
-            "few_shot_acc": few_shot_acc,
-        })
+    # if get_class_acc:
+    #     log.update({
+    #         "many_class_num": many_shot.sum(),
+    #         "medium_class_num": medium_shot.sum(),
+    #         "few_class_num": few_shot.sum(),
+    #         "many_shot_acc": many_shot_acc,
+    #         "medium_shot_acc": medium_shot_acc,
+    #         "few_shot_acc": few_shot_acc,
+    #     })
     logger.info(log)
 
 

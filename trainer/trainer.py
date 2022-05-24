@@ -137,7 +137,7 @@ class Trainer(BaseTrainer):
                     if self.distill:
                         loss = self.criterion(student=output, target=target, teacher=teacher, extra_info=extra_info)
                     elif self.add_extra_info:
-                        loss = self.criterion(output_logits=output, target=target, extra_info=extra_info)
+                        loss = self.criterion(output_logits=output, target=target, extra_info=extra_info) # extra information  = logits
                     else:
                         loss = self.criterion(output_logits=output, target=target)
 

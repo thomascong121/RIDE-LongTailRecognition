@@ -47,6 +47,7 @@ class BaseTrainer:
 
         self.checkpoint_dir = config.save_dir
 
+
         # setup visualization writer instance                
         self.writer = TensorboardWriter(config.log_dir, self.logger, cfg_trainer['tensorboard'])
 
@@ -67,7 +68,7 @@ class BaseTrainer:
         """
         raise NotImplementedError
 
-    def train(self):
+    def train(self, wandb_logger):
         """
         Full training logic
         """
@@ -82,7 +83,8 @@ class BaseTrainer:
             # print logged informations to the screen
             for key, value in log.items():
                 self.logger.info('    {:15s}: {}'.format(str(key), value))
-
+            wandb_logger.log(log)
+            wandb_logger.summary["val/best_accuracy"] = log['val_accuracy']
             # evaluate model performance according to configured metric, save best checkpoint as model_best
             best = False
             if self.mnt_mode != 'off':
@@ -148,6 +150,7 @@ class BaseTrainer:
             'config': self.config,
             'criterion': self.criterion.state_dict()
         }
+
         if not best_only:
             filename = str(self.checkpoint_dir / 'checkpoint-epoch{}.pth'.format(epoch))
             torch.save(state, filename)
