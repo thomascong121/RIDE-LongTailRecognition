@@ -9,7 +9,7 @@ from utils import read_json, write_json
 
 
 class ConfigParser:
-    def __init__(self, config, resume=None, modification=None, load_crt=None, run_id=None):
+    def __init__(self, config, resume=None, modification=None, load_crt=None, run_id=None, resume_pth=None):
         """
         class to parse configuration json file. Handles hyperparameters for training, initializations of modules, checkpoint saving
         and logging module.
@@ -21,7 +21,7 @@ class ConfigParser:
         # load config file and apply modification
         self._config = _update_config(config, modification)
         self.resume = resume
-
+        self.resume_pth = resume_pth
         self.load_crt = load_crt
 
         # set save_dir where trained model and log will be saved.
@@ -30,13 +30,17 @@ class ConfigParser:
         exper_name = self.config['name']
         if run_id is None: # use timestamp as default run-id
             run_id = datetime.now().strftime(r'%m%d_%H%M%S')
-        self._save_dir = save_dir / 'models' / exper_name / run_id
-        self._log_dir = save_dir / 'log' / exper_name / run_id
+        # self._save_dir = save_dir / 'models' / exper_name / run_id
+        # self._log_dir = save_dir / 'log' / exper_name / run_id
+        self._save_dir = save_dir / 'models' / exper_name
+        self._log_dir = save_dir / 'log' / exper_name
 
         # make directory for saving checkpoints and log.
         exist_ok = run_id == ''
-        self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
-        self.log_dir.mkdir(parents=True, exist_ok=exist_ok)
+        # self.save_dir.mkdir(parents=True, exist_ok=exist_ok)
+        # self.log_dir.mkdir(parents=True, exist_ok=exist_ok)
+        self.save_dir.mkdir(parents=True, exist_ok=True)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
 
         # save updated config file to the checkpoint dir
         write_json(self.config, self.save_dir / 'config.json')
@@ -58,7 +62,6 @@ class ConfigParser:
             args.add_argument(*opt.flags, default=None, type=opt.type)
         if not isinstance(args, tuple):
             args = args.parse_args()
-
         if args.device is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
@@ -69,21 +72,22 @@ class ConfigParser:
         
         if args.resume is not None:
             resume = Path(args.resume)
+            resume_pth = args.resume
             cfg_fname = resume.parent / 'config.json'
         else:
             msg_no_cfg = "Configuration file need to be specified. Add '-c config.json', for example."
             assert args.config is not None, msg_no_cfg
             resume = None
+            resume_pth = None
             cfg_fname = Path(args.config)
         
         config = read_json(cfg_fname)
         if args.config and resume:
             # update new config for fine-tuning
             config.update(read_json(args.config))
-
         # parse custom cli options into dictionary
-        modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}
-        return cls(config, resume, modification, load_crt=load_crt)
+        modification = {opt.target: getattr(args, _get_opt_name(opt.flags)) for opt in options}
+        return cls(config, resume, modification, load_crt=load_crt, resume_pth=resume_pth)
 
     def init_obj(self, name, module, *args, allow_override=False, **kwargs):
         """

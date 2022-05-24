@@ -1,5 +1,6 @@
 import argparse
 import torch
+import wandb
 from tqdm import tqdm
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
@@ -11,7 +12,10 @@ from parse_config import ConfigParser
 
 def main(config):
     logger = config.get_logger('test')
-
+    project_name = 'LT_cifar10'
+    run_name = config.resume_pth.split('/')[-2] + '_TEST'
+    wandb_config = {'dataset': 'cifar10'}
+    wandb.init(project=project_name, name=run_name, config=wandb_config)
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
         config['data_loader']['args']['data_dir'],
@@ -117,8 +121,13 @@ def main(config):
     
     acc = acc_per_class.cpu().numpy()
     print('Acc for each class: \n', acc)
+    acc_per_class_dict = {}
+    for i in range(len(acc)):
+        acc_per_class_dict['class_%d'%i] = acc[i]
+    wandb.log(acc_per_class_dict)
 
     print('Acc with class mean:', acc_per_class.mean().item())
+    wandb.summary["best_accuracy"] = acc_per_class.mean().item()
 
     # np.save("test_acc.npy", acc)
 

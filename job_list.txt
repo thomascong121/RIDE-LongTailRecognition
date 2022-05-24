@@ -1,0 +1,1 @@
+qsub -v ,args='-c=configs/config_imbalance10_cifar10_ride.json' job.sh

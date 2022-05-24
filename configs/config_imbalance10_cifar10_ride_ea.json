@@ -1,5 +1,5 @@
 {
-    "name": "Imbalance_CIFAR10_LT_RIDE_EA",
+    "name": "Imbalance10_CIFAR10_LT_RIDE_EA",
     "n_gpu": 1,
 
     "arch": {

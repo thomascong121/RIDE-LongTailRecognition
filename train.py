@@ -21,6 +21,7 @@ if deterministic:
     torch.backends.cudnn.benchmark = False
     np.random.seed(SEED)
 
+
 def main(config):
     logger = config.get_logger('train')
 
@@ -118,3 +119,4 @@ if __name__ == '__main__':
     ]
     config = ConfigParser.from_args(args, options)
     main(config)
+
