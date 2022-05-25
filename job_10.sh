@@ -21,7 +21,8 @@ export WANDB_CONFIG_DIR=/scratch/sz65/cc0395/wandb/.config
 export WANDB_MODE=offline
 
 python train.py -c "configs/config_imbalance10_cifar10_ride.json" --reduce_dimension 1 --num_experts 3
-python train.py -c "configs/config_imbalance10_cifar10_ride_ea.json" -r /scratch/sz65/cc0395/RIDE/saved/models/Imbalance10_CIFAR10_LT_RIDE/model_best.pth --reduce_dimension 1 --num_experts 3
+python train.py -c "configs/config_imbalance10_cifar10_distill_ride.json" --reduce_dimension 1 --num_experts 3 --distill_checkpoint /scratch/sz65/cc0395/RIDE/saved/models/Imbalance10_CIFAR10_LT_RIDE/model_best.pth
+python train.py -c "configs/config_imbalance10_cifar10_ride_ea.json" -r /scratch/sz65/cc0395/RIDE/saved/models/Imbalance10_CIFAR10_LT_RIDE_DISTILL/model_best.pth --reduce_dimension 1 --num_experts 3
 python test.py -r /scratch/sz65/cc0395/RIDE/saved/models/Imbalance10_CIFAR10_LT_RIDE_EA/model_best.pth
 
 

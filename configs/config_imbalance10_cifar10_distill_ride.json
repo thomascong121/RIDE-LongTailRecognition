@@ -1,5 +1,5 @@
 {
-    "name": "Imbalance10_CIFAR10_LT_RIDE",
+    "name": "Imbalance10_CIFAR10_LT_RIDE_DISTILL",
     "n_gpu": 1,
 
     "arch": {
@@ -11,6 +11,17 @@
             "num_experts": 3
         }
     },
+    "distill_arch": {
+        "type": "ResNet32Model",
+        "args": {
+            "num_classes": 10,
+            "num_experts": 6,
+            "reduce_dimension": true,
+            "use_norm": true
+        }
+    },
+    "distill": true,
+    "distill_checkpoint": "imbalance_cifar100_resnet32_6_experts.pth",
     "data_loader": {
         "type": "ImbalanceCIFAR10DataLoader",
         "args":{
@@ -32,9 +43,10 @@
     },
     "add_extra_info": true,
     "loss": {
-        "type": "RIDELoss",
+        "type": "RIDELossWithDistill",
         "args": {
             "additional_diversity_factor": -0.45,
+            "distill_temperature": 1.5,
             "reweight": true,
             "reweight_epoch": 160
         }
@@ -48,14 +60,14 @@
             "step1": 160,
             "step2": 180,
             "gamma": 0.01,
-            "warmup_epoch": 5
+            "warmup_epoch": 20
         }
     },
     "trainer": {
         "epochs": 200,
 
         "save_dir": "saved/",
-        "save_period": 40,
+        "save_period": 200,
         "verbosity": 2,
 
         "monitor": "max val_accuracy",

@@ -44,6 +44,7 @@ def main(config):
 
     # get function handles of loss and metrics
     loss_class = getattr(module_loss, config["loss"]["type"])
+    print('======> CLass number list ', data_loader.cls_num_list)
     if hasattr(loss_class, "require_num_experts") and loss_class.require_num_experts:
         criterion = config.init_obj('loss', module_loss, cls_num_list=data_loader.cls_num_list, num_experts=config["arch"]["args"]["num_experts"])
     else:

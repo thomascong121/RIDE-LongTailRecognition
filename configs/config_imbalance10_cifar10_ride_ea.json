@@ -20,7 +20,8 @@
             "batch_size": 512,
             "shuffle": true,
             "num_workers": 2,
-            "balanced": true
+            "balanced": true,
+            "imb_factor": 0.1
         }
     },
     "optimizer": {
